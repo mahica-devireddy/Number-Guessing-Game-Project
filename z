@@ -1,0 +1,162 @@
+// A program that generates a number between 1-10 and the user has to guess what
+// the number is
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+typedef struct node {
+
+  int data;
+  struct node *next;
+
+} node;
+
+node *createNode(int data) {
+
+  node *newNode = (node *)malloc(sizeof(node));
+
+  newNode->data = data;
+  newNode->next = NULL;
+
+  return newNode;
+}
+
+void insertAtEnd(node **head, int data) {
+
+  node *newNode = createNode(data);
+
+  if (*head == NULL) {
+    *head = newNode;
+  } else {
+    node *current = *head;
+    while (current->next != NULL) {
+      current = current->next;
+    }
+    current->next = newNode;
+  }
+}
+
+// if there is a duplicate the function will return a 1
+// otherwise the function will return a 0
+
+int findDuplicate(node *head) {
+
+  if (head == NULL || head->next == NULL) {
+    return 0;
+  }
+
+  while (head != NULL) {
+    node *curr = head->next;
+
+    while (curr != NULL) {
+
+      if (head->data == curr->data) {
+        return 1;
+      } else {
+        curr = curr->next;
+      }
+    }
+
+    head = head->next;
+  }
+
+  return 0;
+}
+
+void deleteLastNode(node *head) {
+
+  if (head == NULL) {
+    return;
+  }
+
+  if (head->next == NULL) {
+    free(head);
+    head = NULL;
+    return;
+  }
+
+  node *curr = head;
+  while (curr->next->next != NULL) {
+    curr = curr->next;
+  }
+
+  free(curr->next);
+  curr->next = NULL;
+}
+
+int ranNumGenerator() {
+
+  int val = rand() % 10 + 1;
+
+  return val;
+}
+
+void freeLL(node *head) {
+
+  node *curr = head;
+  while (curr != NULL) {
+    node *nextNode = curr->next;
+    free(curr);
+    curr = nextNode;
+  }
+}
+
+void printArr(node *head) {
+
+  node *curr = head;
+  while (curr != NULL) {
+    printf("%d ", curr->data);
+    curr = curr->next;
+  }
+  printf("\n");
+}
+
+int main(void) {
+
+  node *head = NULL;
+
+  srand(time(NULL));
+  int value = ranNumGenerator();
+
+  int userVal = 0;
+  int numGuesses = 1;
+
+  // printf("%d\n", value);
+  printf("I'm thinking of a number 1-10\n");
+
+  // within this is where the game is played
+  while (value != userVal) {
+
+    printf("\nGuess #%d: ", numGuesses);
+    scanf("%d", &userVal);
+    insertAtEnd(&head, userVal);
+
+    numGuesses++;
+
+    int duplicateFlag = findDuplicate(head);
+
+    // printf("\n%d\n", duplicateFlag);
+    if (duplicateFlag == 1) {
+      printf("\nYou already guessed this, try another number. \n");
+      deleteLastNode(head);
+    }
+  }
+
+  // game is OVER
+  numGuesses -= 1;
+
+  if (numGuesses == 1) {
+    printf(
+        "\nHooray!\n\nIt took you %d try to guess the number I was thinking of",
+        numGuesses);
+  } else {
+    printf("\nHooray!\n\nIt took you %d tries to guess the number I was "
+           "thinking of!",
+           numGuesses);
+  }
+
+  freeLL(head);
+
+  return 0;
+}
